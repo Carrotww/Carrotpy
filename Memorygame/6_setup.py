@@ -55,6 +55,11 @@ def display_start_screen():
     # 흰색으로 동그라미를 그리는데 중심 좌표는 start_button의 중심좌표를 따라가고,
     # 반지름은 60, 선 두께는 5
 
+    msg = game_font.render(f"{curr_level}", True, WHITE)
+    msg_rect = msg.get_rect(center=start_button.center)
+
+    screen.blit(msg, msg_rect)
+
 # position 에 해당하는 버튼 확인
 def check_buttons(pos):
     global start, start_ticks
@@ -66,7 +71,7 @@ def check_buttons(pos):
         start_ticks = pygame.time.get_ticks() # 타이머 시작 (현재 시간을 저장)
 
 def check_number_buttons(pos):
-    global hidden
+    global hidden, start, curr_level
 
     for button in number_buttons:
         if button.collidepoint(pos):
@@ -76,8 +81,27 @@ def check_number_buttons(pos):
                 if not hidden:
                     hidden = True # 숫자 숨김 처리
             else: # 잘못된 숫자 클릭
-                print("Wrong")
-                break
+                game_over()
+            break
+
+    # 모든 숫자를 다 맞췄다면? 레벨을 높여서 다시 시작화면으로 간다.
+    if len(number_buttons) == 0:
+        start = False
+        hidden = False
+        curr_level += 1
+        setup(curr_level)
+
+# 게임 종료 처리. 메시지도 보여줌
+def game_over():
+    global running
+
+    running = False
+
+    msg = game_font.render(f"Your level is {curr_level}", True, WHITE)
+    msg_rect = msg.get_rect(center=(screen_width/2, screen_height/2))
+
+    screen.fill(BLACK)
+    screen.blit(msg, msg_rect)
 
 # 게임 화면 보여주기
 def display_game_screen():
@@ -116,6 +140,7 @@ WHITE = (255, 255, 255)
 GRAY = (50, 50, 50)
 
 number_buttons = [] # 플레이어가 눌러야 하는 버튼들 저장
+curr_level = 1 # 현재 레벨
 display_time = None # 숫자를 보여주는 시간
 start_ticks = None # 시간 계산 (현재 시간 정보를 저장)
 
@@ -154,6 +179,8 @@ while running:
 
     # 화면 업데이트
     pygame.display.update()
+
+pygame.time.delay(2300)
 
 # 게임 종료
 pygame.quit()
